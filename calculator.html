@@ -1,0 +1,203 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <title>員工受益憑證：經營者決策模擬系統 (自動儲存版)</title>
+    <style>
+        body { font-family: "Microsoft JhengHei", sans-serif; padding: 20px; background-color: #f0f4f8; color: #333; }
+        .container { max-width: 1200px; margin: auto; background: white; padding: 30px; border-radius: 15px; box-shadow: 0 10px 30px rgba(0,0,0,0.1); }
+        .header-flex { display: flex; justify-content: space-between; align-items: center; border-bottom: 2px solid #1a73e8; margin-bottom: 25px; padding-bottom: 10px; }
+        h2 { color: #1a73e8; margin: 0; }
+        
+        .setup-panel { background: #e8f0fe; padding: 25px; border-radius: 12px; margin-bottom: 30px; display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
+        .control-group { display: flex; flex-direction: column; align-items: center; }
+        label { font-weight: bold; margin-bottom: 10px; color: #5f6368; }
+        input[type=range] { width: 80%; cursor: pointer; }
+        .highlight { font-weight: bold; color: #d93025; font-size: 1.4em; }
+        .input-field, .select-field { padding: 10px; border: 1px solid #dadce0; border-radius: 6px; text-align: center; font-size: 1em; background: white; }
+        
+        .add-form { background: #fff; padding: 20px; border: 2px dashed #1a73e8; border-radius: 10px; margin-bottom: 25px; display: flex; gap: 15px; justify-content: center; align-items: center; flex-wrap: wrap; }
+        .btn { padding: 10px 20px; border: none; border-radius: 6px; cursor: pointer; font-weight: bold; transition: 0.3s; }
+        .btn-add { background: #1a73e8; color: white; }
+        .btn-clear { background: #6c757d; color: white; }
+        .btn-del { background: #ea4335; color: white; padding: 5px 12px; font-size: 0.8em; }
+        
+        table { width: 100%; border-collapse: collapse; margin-top: 10px; background: white; border-radius: 8px; overflow: hidden; }
+        th, td { border: 1px solid #e8eaed; padding: 15px; text-align: center; }
+        th { background-color: #1a73e8; color: white; }
+        tr:nth-child(even) { background-color: #f8f9fa; }
+        .roi-cell { background-color: #fef7e0; font-weight: bold; color: #202124; }
+        .monthly-cell { color: #188038; font-weight: bold; background-color: #e6f4ea; }
+        
+        .summary-box { display: flex; justify-content: space-around; background: #202124; color: white; padding: 20px; border-radius: 10px; margin-top: 30px; }
+        .save-hint { font-size: 0.8em; color: #188038; font-weight: bold; margin-top: 5px; }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <div class="header-flex">
+        <h2>員工受益憑證：經營者決議試算表</h2>
+        <button class="btn btn-clear" onclick="resetAll()">全部清除重來</button>
+    </div>
+
+    <div class="setup-panel">
+        <div class="control-group">
+            <label>1. 設定年度總損益 (NT$)</label>
+            <input type="number" id="totalProfitInput" class="input-field" style="width: 220px;" value="25000000" oninput="saveAndCalc()">
+            <div class="save-hint">✓ 資料已自動儲存</div>
+        </div>
+        <div class="control-group">
+            <label>2. 調整最終分紅比例：<span id="currentRatio" class="highlight">10</span>%</label>
+            <input type="range" id="ratioSlider" min="3" max="10" step="0.5" value="10" oninput="saveAndCalc()">
+            <p style="font-size: 0.8em; color: #70757a;">* 拖動滑桿即刻連動下方數據</p>
+        </div>
+    </div>
+
+    <div class="add-form">
+        <strong>新增模擬對象：</strong>
+        <input type="text" id="newName" placeholder="姓名" class="input-field" style="width: 120px;">
+        <select id="newTitle" class="select-field">
+            <option value="">選擇職稱</option>
+            <option value="董事長">董事長</option>
+            <option value="總經理">總經理</option>
+            <option value="經理">經理</option>
+            <option value="副理">副理</option>
+            <option value="副總監">副總監</option>
+            <option value="員工">員工</option>
+        </select>
+        <select id="newCount" class="select-field">
+            <option value="">認購張數</option>
+            <option value="1">1 張</option><option value="2">2 張</option><option value="3">3 張</option>
+            <option value="4">4 張</option><option value="5">5 張</option><option value="6">6 張</option>
+            <option value="7">7 張</option><option value="8">8 張</option><option value="9">9 張</option>
+            <option value="10">10 張</option>
+        </select>
+        <button class="btn btn-add" onclick="addEmployee()">加入清單</button>
+    </div>
+
+    <table>
+        <thead>
+            <tr>
+                <th>姓名 / 職稱</th>
+                <th>認購張數</th>
+                <th>投資總額 (5萬/張)</th>
+                <th>預估年分紅</th>
+                <th>平均月領加薪</th>
+                <th>投報率 (ROI)</th>
+                <th>操作</th>
+            </tr>
+        </thead>
+        <tbody id="employeeBody"></tbody>
+    </table>
+
+    <div class="summary-box">
+        <div class="summary-item">
+            <div>總計發行張數</div>
+            <div id="totalCardsSum" style="font-size: 1.8em; font-weight: bold; color: #8ab4f8;">0</div>
+        </div>
+        <div class="summary-item">
+            <div>公司總提撥分紅 (年度)</div>
+            <div id="totalPayoutSum" style="font-size: 1.8em; font-weight: bold; color: #8ab4f8;">0</div>
+        </div>
+    </div>
+</div>
+
+<script>
+    let employees = [];
+
+    // 初始化：載入舊有資料
+    window.onload = function() {
+        const savedData = localStorage.getItem('ceo_sim_data');
+        const savedProfit = localStorage.getItem('ceo_sim_profit');
+        const savedRatio = localStorage.getItem('ceo_sim_ratio');
+
+        if (savedData) employees = JSON.parse(savedData);
+        if (savedProfit) document.getElementById('totalProfitInput').value = savedProfit;
+        if (savedRatio) document.getElementById('ratioSlider').value = savedRatio;
+        
+        updateCalculations();
+    };
+
+    function addEmployee() {
+        const name = document.getElementById('newName').value;
+        const title = document.getElementById('newTitle').value;
+        const countStr = document.getElementById('newCount').value;
+
+        if (name && title && countStr) {
+            employees.push({ name, title, count: parseInt(countStr) });
+            document.getElementById('newName').value = '';
+            document.getElementById('newTitle').value = '';
+            document.getElementById('newCount').value = '';
+            saveAndCalc();
+        } else {
+            alert("請完整選擇姓名、職稱與張數！");
+        }
+    }
+
+    function deleteEmployee(index) {
+        employees.splice(index, 1);
+        saveAndCalc();
+    }
+
+    function resetAll() {
+        if (confirm("確定要清除所有資料重新開始嗎？")) {
+            employees = [];
+            localStorage.clear();
+            document.getElementById('totalProfitInput').value = 25000000;
+            document.getElementById('ratioSlider').value = 10;
+            updateCalculations();
+        }
+    }
+
+    function saveAndCalc() {
+        // 儲存到瀏覽器
+        localStorage.setItem('ceo_sim_data', JSON.stringify(employees));
+        localStorage.setItem('ceo_sim_profit', document.getElementById('totalProfitInput').value);
+        localStorage.setItem('ceo_sim_ratio', document.getElementById('ratioSlider').value);
+        updateCalculations();
+    }
+
+    function updateCalculations() {
+        const totalProfit = parseFloat(document.getElementById('totalProfitInput').value) || 0;
+        const ratio = document.getElementById('ratioSlider').value / 100;
+        const cardFaceValue = 50000; 
+        
+        document.getElementById('currentRatio').innerText = document.getElementById('ratioSlider').value;
+
+        let totalCards = 0;
+        employees.forEach(emp => totalCards += emp.count);
+        document.getElementById('totalCardsSum').innerText = totalCards;
+
+        const totalBonusPool = totalProfit * ratio;
+        document.getElementById('totalPayoutSum').innerText = Math.round(totalBonusPool).toLocaleString();
+
+        const perCardBonus = totalCards > 0 ? totalBonusPool / totalCards : 0;
+        const employeeBody = document.getElementById('employeeBody');
+        employeeBody.innerHTML = '';
+
+        if (employees.length === 0) {
+            employeeBody.innerHTML = '<tr><td colspan="7" style="color:#999; padding: 40px;">清單已清空。請新增同仁進行試算，資料將會自動儲存。</td></tr>';
+            return;
+        }
+
+        employees.forEach((emp, index) => {
+            const empTotalBonus = emp.count * perCardBonus;
+            const empMonthly = empTotalBonus / 12;
+            const empTotalInvest = emp.count * cardFaceValue;
+            const roi = empTotalInvest > 0 ? (empTotalBonus / empTotalInvest) * 100 : 0;
+
+            employeeBody.innerHTML += `<tr>
+                <td><strong>${emp.name}</strong><br><small>${emp.title}</small></td>
+                <td>${emp.count} 張</td>
+                <td>${empTotalInvest.toLocaleString()}</td>
+                <td style="color: #1a73e8; font-weight:bold;">${Math.round(empTotalBonus).toLocaleString()}</td>
+                <td class="monthly-cell">NT$ ${Math.round(empMonthly).toLocaleString()}</td>
+                <td class="roi-cell">${roi.toFixed(1)}%</td>
+                <td><button class="btn btn-del" onclick="deleteEmployee(${index})">移除</button></td>
+            </tr>`;
+        });
+    }
+</script>
+</body>
+</html>
