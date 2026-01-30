@@ -2,202 +2,209 @@
 <html lang="zh-TW">
 <head>
     <meta charset="UTF-8">
-    <title>員工受益憑證：經營者決策模擬系統 (自動儲存版)</title>
+    <title>員工分紅試算表</title>
     <style>
-        body { font-family: "Microsoft JhengHei", sans-serif; padding: 20px; background-color: #f0f4f8; color: #333; }
-        .container { max-width: 1200px; margin: auto; background: white; padding: 30px; border-radius: 15px; box-shadow: 0 10px 30px rgba(0,0,0,0.1); }
-        .header-flex { display: flex; justify-content: space-between; align-items: center; border-bottom: 2px solid #1a73e8; margin-bottom: 25px; padding-bottom: 10px; }
-        h2 { color: #1a73e8; margin: 0; }
+        /* 強制列印色彩指令 */
+        * { -webkit-print-color-adjust: exact !important; print-color-adjust: exact !important; }
+
+        body { font-family: "Microsoft JhengHei", sans-serif; padding: 15px; background-color: #f4f7f9; color: #202124; font-size: 18px; }
+        .container { max-width: 1150px; margin: auto; background: white; padding: 25px; border-radius: 12px; }
         
-        .setup-panel { background: #e8f0fe; padding: 25px; border-radius: 12px; margin-bottom: 30px; display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
-        .control-group { display: flex; flex-direction: column; align-items: center; }
-        label { font-weight: bold; margin-bottom: 10px; color: #5f6368; }
-        input[type=range] { width: 80%; cursor: pointer; }
-        .highlight { font-weight: bold; color: #d93025; font-size: 1.4em; }
-        .input-field, .select-field { padding: 10px; border: 1px solid #dadce0; border-radius: 6px; text-align: center; font-size: 1em; background: white; }
+        .header-flex { display: flex; justify-content: space-between; align-items: center; border-bottom: 3px solid #1a73e8; margin-bottom: 20px; padding-bottom: 10px; }
+        .main-title { font-size: 28px; color: #1a73e8; font-weight: bold; margin: 0; }
+
+        /* 參數設定區 */
+        .setup-panel { background: #e8f0fe !important; padding: 20px; border-radius: 10px; margin-bottom: 20px; display: grid; grid-template-columns: 1.2fr 1.2fr 1fr; gap: 15px; border: 1px solid #d1e3f8; }
+        .control-group { display: flex; flex-direction: column; align-items: center; border-right: 2px solid #d1e3f8; padding: 0 10px; }
+        .highlight { font-weight: bold; color: #d93025; font-size: 22px; }
+        .input-field { padding: 8px; border: 2px solid #dadce0; border-radius: 6px; text-align: center; width: 160px; font-size: 18px; font-weight: bold; }
         
-        .add-form { background: #fff; padding: 20px; border: 2px dashed #1a73e8; border-radius: 10px; margin-bottom: 25px; display: flex; gap: 15px; justify-content: center; align-items: center; flex-wrap: wrap; }
-        .btn { padding: 10px 20px; border: none; border-radius: 6px; cursor: pointer; font-weight: bold; transition: 0.3s; }
-        .btn-add { background: #1a73e8; color: white; }
-        .btn-clear { background: #6c757d; color: white; }
-        .btn-del { background: #ea4335; color: white; padding: 5px 12px; font-size: 0.8em; }
+        .add-form { background: #fff; padding: 15px; border: 2px dashed #1a73e8; border-radius: 10px; margin-bottom: 20px; display: flex; gap: 12px; justify-content: center; align-items: center; }
         
-        table { width: 100%; border-collapse: collapse; margin-top: 10px; background: white; border-radius: 8px; overflow: hidden; }
-        th, td { border: 1px solid #e8eaed; padding: 15px; text-align: center; }
-        th { background-color: #1a73e8; color: white; }
-        tr:nth-child(even) { background-color: #f8f9fa; }
-        .roi-cell { background-color: #fef7e0; font-weight: bold; color: #202124; }
-        .monthly-cell { color: #188038; font-weight: bold; background-color: #e6f4ea; }
-        
-        .summary-box { display: flex; justify-content: space-around; background: #202124; color: white; padding: 20px; border-radius: 10px; margin-top: 30px; }
-        .save-hint { font-size: 0.8em; color: #188038; font-weight: bold; margin-top: 5px; }
+        /* 表格優化 */
+        table { width: 100%; border-collapse: collapse; font-size: 17px; margin-bottom: 25px; }
+        th, td { border: 1px solid #bdc3c7; padding: 12px 5px; text-align: center; }
+        th { background-color: #f1f3f4 !important; font-size: 18px; color: #000; }
+        .val-monthly { background-color: #e6f4ea !important; color: #188038; font-weight: bold; font-size: 19px; }
+        .val-bonus { font-weight: bold; color: #1a73e8; font-size: 19px; }
+
+        /* 財務結算卡片 - 確保列印色塊 */
+        .summary-bar { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
+        .summary-card { padding: 20px; border-radius: 12px; color: white !important; }
+        .card-p { background-color: #1a73e8 !important; } 
+        .card-r { background-color: #2c3e50 !important; } 
+        .card-title { font-size: 20px; font-weight: bold; text-decoration: underline; margin-bottom: 10px; }
+        .card-total { font-size: 26px; font-weight: bold; border-bottom: 2px solid rgba(255,255,255,0.4); padding-bottom: 10px; margin-bottom: 10px; }
+        .final-result { margin-top: 15px; padding: 12px; background: #fff !important; border-radius: 8px; font-size: 24px; font-weight: bold; color: #d93025 !important; text-align: center; border: 2px solid #d93025; }
+
+        .btn { padding: 12px 24px; cursor: pointer; border: none; border-radius: 8px; font-weight: bold; font-size: 18px; }
+        .btn-print { background: #34a853; color: white; }
+
+        @media print {
+            @page { size: A4 landscape; margin: 0.5cm; }
+            body { background: white; padding: 0; }
+            .container { max-width: 100%; box-shadow: none; border: none; }
+            input[type="range"], .add-form, .btn, .btn-del { display: none !important; }
+            .setup-panel { border: 2px solid #1a73e8 !important; }
+        }
     </style>
 </head>
 <body>
 
 <div class="container">
     <div class="header-flex">
-        <h2>員工受益憑證：經營者決議試算表</h2>
-        <button class="btn btn-clear" onclick="resetAll()">全部清除重來</button>
+        <h1 class="main-title">員工分紅試算表</h1>
+        <button class="btn btn-print" onclick="window.print()">🖨️ 點此直接列印 (A4)</button>
     </div>
 
     <div class="setup-panel">
         <div class="control-group">
-            <label>1. 設定年度總損益 (NT$)</label>
-            <input type="number" id="totalProfitInput" class="input-field" style="width: 220px;" value="25000000" oninput="saveAndCalc()">
-            <div class="save-hint">✓ 資料已自動儲存</div>
+            <div style="font-size: 18px; font-weight: bold;">模式 A：年度原始損益 (NT$)</div>
+            <input type="number" id="pInput" class="input-field" value="25000000" oninput="calc()">
+            <div style="margin-top:10px;">提撥比例：<span id="pRatioLab" class="highlight">10</span>%</div>
+            <input type="range" id="pRatio" min="0.5" max="10" step="0.5" value="10" oninput="calc()">
         </div>
         <div class="control-group">
-            <label>2. 調整最終分紅比例：<span id="currentRatio" class="highlight">10</span>%</label>
-            <input type="range" id="ratioSlider" min="3" max="10" step="0.5" value="10" oninput="saveAndCalc()">
-            <p style="font-size: 0.8em; color: #70757a;">* 拖動滑桿即刻連動下方數據</p>
+            <div style="font-size: 18px; font-weight: bold;">模式 B：年度原始營業額 (NT$)</div>
+            <input type="number" id="rInput" class="input-field" value="100000000" oninput="calc()">
+            <div style="margin-top:10px;">提撥比例：<span id="rRatioLab" class="highlight">0.5</span>%</div>
+            <input type="range" id="rRatio" min="0.1" max="5" step="0.1" value="0.5" oninput="calc()">
+        </div>
+        <div class="control-group" style="border:none;">
+            <div style="font-size: 18px; font-weight: bold;">認購統計 (上限 100 張)</div>
+            <div style="font-weight:bold; margin-top:10px; font-size: 20px;">
+                已認購：<span id="subCount" style="color:#1a73e8;">0</span> 張<br>
+                公司保留：<span id="resCount" style="color:#f39c12;">100</span> 張
+            </div>
         </div>
     </div>
 
     <div class="add-form">
-        <strong>新增模擬對象：</strong>
-        <input type="text" id="newName" placeholder="姓名" class="input-field" style="width: 120px;">
-        <select id="newTitle" class="select-field">
-            <option value="">選擇職稱</option>
+        <input type="text" id="newName" placeholder="員工姓名" class="input-field" style="width:120px">
+        <select id="newTitle" class="input-field" style="width:140px">
             <option value="董事長">董事長</option>
             <option value="總經理">總經理</option>
+            <option value="副總經理">副總經理</option>
             <option value="經理">經理</option>
-            <option value="副理">副理</option>
             <option value="副總監">副總監</option>
-            <option value="員工">員工</option>
+            <option value="副理">副理</option>
+            <option value="同仁">同仁</option>
         </select>
-        <select id="newCount" class="select-field">
-            <option value="">認購張數</option>
-            <option value="1">1 張</option><option value="2">2 張</option><option value="3">3 張</option>
-            <option value="4">4 張</option><option value="5">5 張</option><option value="6">6 張</option>
-            <option value="7">7 張</option><option value="8">8 張</option><option value="9">9 張</option>
-            <option value="10">10 張</option>
+        <select id="newCards" class="input-field" style="width:100px">
+            <script>for(let i=1;i<=10;i++) document.write(`<option value="${i}">${i} 張</option>`);</script>
         </select>
-        <button class="btn btn-add" onclick="addEmployee()">加入清單</button>
+        <button class="btn" style="background:#1a73e8; color:white;" onclick="add()">➕ 加入</button>
     </div>
 
     <table>
         <thead>
             <tr>
-                <th>姓名 / 職稱</th>
-                <th>認購張數</th>
-                <th>投資總額 (5萬/張)</th>
-                <th>預估年分紅</th>
-                <th>平均月領加薪</th>
-                <th>投報率 (ROI)</th>
-                <th>操作</th>
+                <th style="width: 14%;">姓名/職稱</th>
+                <th style="width: 8%;">張數</th>
+                <th colspan="3" style="background:#eef4ff !important;">模式 A (損益制)</th>
+                <th colspan="3" style="background:#fff9f0 !important;">模式 B (營收制)</th>
+                <th class="btn-del"></th>
+            </tr>
+            <tr style="font-size: 15px;">
+                <th></th><th></th><th>年分紅</th><th>月加薪</th><th>ROI</th><th>年分紅</th><th>月加薪</th><th>ROI</th><th class="btn-del"></th>
             </tr>
         </thead>
-        <tbody id="employeeBody"></tbody>
+        <tbody id="list"></tbody>
     </table>
 
-    <div class="summary-box">
-        <div class="summary-item">
-            <div>總計發行張數</div>
-            <div id="totalCardsSum" style="font-size: 1.8em; font-weight: bold; color: #8ab4f8;">0</div>
+    <div class="summary-bar">
+        <div class="summary-card card-p">
+            <div class="card-title">【模式 A】財務結算報告</div>
+            <div id="pTitleTotal" class="card-total">NT$ 0</div>
+            <div style="font-size: 18px; line-height: 1.8;">
+                ‧ 提撥預算 (100張)：<span id="pPool">0</span><br>
+                ‧ 每張價值：<span id="pPer">0</span><br>
+                ‧ 員工實領總額：<span id="pPaid">0</span><br>
+                ‧ 保留額回撥：<span id="pBack" style="color:#f1c40f; font-weight:bold;">0</span>
+            </div>
+            <div class="final-result">最終帳上損益：<span id="pFinal">0</span></div>
         </div>
-        <div class="summary-item">
-            <div>公司總提撥分紅 (年度)</div>
-            <div id="totalPayoutSum" style="font-size: 1.8em; font-weight: bold; color: #8ab4f8;">0</div>
+
+        <div class="summary-card card-r">
+            <div class="card-title">【模式 B】財務結算報告</div>
+            <div id="rTitleTotal" class="card-total">NT$ 0</div>
+            <div style="font-size: 18px; line-height: 1.8;">
+                ‧ 提撥預算 (100張)：<span id="rPool">0</span><br>
+                ‧ 每張價值：<span id="rPer">0</span><br>
+                ‧ 員工實領總額：<span id="rPaid">0</span><br>
+                ‧ 保留額回撥：<span id="rBack" style="color:#f1c40f; font-weight:bold;">0</span>
+            </div>
+            <div class="final-result">最終帳上損益：<span id="rFinal">0</span></div>
         </div>
     </div>
 </div>
 
 <script>
-    let employees = [];
-
-    // 初始化：載入舊有資料
-    window.onload = function() {
-        const savedData = localStorage.getItem('ceo_sim_data');
-        const savedProfit = localStorage.getItem('ceo_sim_profit');
-        const savedRatio = localStorage.getItem('ceo_sim_ratio');
-
-        if (savedData) employees = JSON.parse(savedData);
-        if (savedProfit) document.getElementById('totalProfitInput').value = savedProfit;
-        if (savedRatio) document.getElementById('ratioSlider').value = savedRatio;
-        
-        updateCalculations();
-    };
-
-    function addEmployee() {
-        const name = document.getElementById('newName').value;
-        const title = document.getElementById('newTitle').value;
-        const countStr = document.getElementById('newCount').value;
-
-        if (name && title && countStr) {
-            employees.push({ name, title, count: parseInt(countStr) });
-            document.getElementById('newName').value = '';
-            document.getElementById('newTitle').value = '';
-            document.getElementById('newCount').value = '';
-            saveAndCalc();
-        } else {
-            alert("請完整選擇姓名、職稱與張數！");
-        }
+    let emps = [];
+    function add() {
+        const n = document.getElementById('newName').value || '未命名';
+        const t = document.getElementById('newTitle').value;
+        const c = parseInt(document.getElementById('newCards').value);
+        emps.push({n, t, c});
+        calc();
+        document.getElementById('newName').value = '';
     }
 
-    function deleteEmployee(index) {
-        employees.splice(index, 1);
-        saveAndCalc();
-    }
+    function calc() {
+        const pOrig = parseFloat(document.getElementById('pInput').value) || 0;
+        const pRatioVal = document.getElementById('pRatio').value;
+        document.getElementById('pRatioLab').innerText = pRatioVal;
+        const pPoolVal = pOrig * (pRatioVal/100);
+        const pPerV = pPoolVal / 100;
 
-    function resetAll() {
-        if (confirm("確定要清除所有資料重新開始嗎？")) {
-            employees = [];
-            localStorage.clear();
-            document.getElementById('totalProfitInput').value = 25000000;
-            document.getElementById('ratioSlider').value = 10;
-            updateCalculations();
-        }
-    }
+        const rRev = parseFloat(document.getElementById('rInput').value) || 0;
+        const rRatioVal = document.getElementById('rRatio').value;
+        document.getElementById('rRatioLab').innerText = rRatioVal;
+        const rPoolVal = rRev * (rRatioVal/100);
+        const rPerV = rPoolVal / 100;
 
-    function saveAndCalc() {
-        // 儲存到瀏覽器
-        localStorage.setItem('ceo_sim_data', JSON.stringify(employees));
-        localStorage.setItem('ceo_sim_profit', document.getElementById('totalProfitInput').value);
-        localStorage.setItem('ceo_sim_ratio', document.getElementById('ratioSlider').value);
-        updateCalculations();
-    }
+        let sub = 0, pP = 0, rP = 0;
+        let html = '';
 
-    function updateCalculations() {
-        const totalProfit = parseFloat(document.getElementById('totalProfitInput').value) || 0;
-        const ratio = document.getElementById('ratioSlider').value / 100;
-        const cardFaceValue = 50000; 
-        
-        document.getElementById('currentRatio').innerText = document.getElementById('ratioSlider').value;
-
-        let totalCards = 0;
-        employees.forEach(emp => totalCards += emp.count);
-        document.getElementById('totalCardsSum').innerText = totalCards;
-
-        const totalBonusPool = totalProfit * ratio;
-        document.getElementById('totalPayoutSum').innerText = Math.round(totalBonusPool).toLocaleString();
-
-        const perCardBonus = totalCards > 0 ? totalBonusPool / totalCards : 0;
-        const employeeBody = document.getElementById('employeeBody');
-        employeeBody.innerHTML = '';
-
-        if (employees.length === 0) {
-            employeeBody.innerHTML = '<tr><td colspan="7" style="color:#999; padding: 40px;">清單已清空。請新增同仁進行試算，資料將會自動儲存。</td></tr>';
-            return;
-        }
-
-        employees.forEach((emp, index) => {
-            const empTotalBonus = emp.count * perCardBonus;
-            const empMonthly = empTotalBonus / 12;
-            const empTotalInvest = emp.count * cardFaceValue;
-            const roi = empTotalInvest > 0 ? (empTotalBonus / empTotalInvest) * 100 : 0;
-
-            employeeBody.innerHTML += `<tr>
-                <td><strong>${emp.name}</strong><br><small>${emp.title}</small></td>
-                <td>${emp.count} 張</td>
-                <td>${empTotalInvest.toLocaleString()}</td>
-                <td style="color: #1a73e8; font-weight:bold;">${Math.round(empTotalBonus).toLocaleString()}</td>
-                <td class="monthly-cell">NT$ ${Math.round(empMonthly).toLocaleString()}</td>
-                <td class="roi-cell">${roi.toFixed(1)}%</td>
-                <td><button class="btn btn-del" onclick="deleteEmployee(${index})">移除</button></td>
+        emps.forEach((e, i) => {
+            sub += e.c;
+            const invest = e.c * 50000;
+            const pB = e.c * pPerV;
+            const rB = e.c * rPerV;
+            pP += pB; rP += rB;
+            html += `<tr>
+                <td><b>${e.n}</b><br><small>${e.t}</small></td>
+                <td><b>${e.c}</b> 張</td>
+                <td class="val-bonus">${Math.round(pB).toLocaleString()}</td>
+                <td class="val-monthly">${Math.round(pB/12).toLocaleString()}</td>
+                <td>${invest>0?(pB/invest*100).toFixed(0):0}%</td>
+                <td class="val-bonus">${Math.round(rB).toLocaleString()}</td>
+                <td class="val-monthly">${Math.round(rB/12).toLocaleString()}</td>
+                <td>${invest>0?(rB/invest*100).toFixed(0):0}%</td>
+                <td class="btn-del"><button onclick="emps.splice(${i},1);calc();" style="color:red; cursor:pointer; border:none; background:none; font-size:20px;">✖</button></td>
             </tr>`;
         });
+
+        document.getElementById('list').innerHTML = html || '<tr><td colspan="9">請加入名單</td></tr>';
+        document.getElementById('subCount').innerText = sub;
+        document.getElementById('resCount').innerText = 100 - sub;
+
+        const res = 100 - sub;
+        document.getElementById('pTitleTotal').innerText = '原始損益 NT$ ' + pOrig.toLocaleString();
+        document.getElementById('pPool').innerText = Math.round(pPoolVal).toLocaleString();
+        document.getElementById('pPer').innerText = Math.round(pPerV).toLocaleString();
+        document.getElementById('pPaid').innerText = Math.round(pP).toLocaleString();
+        document.getElementById('pBack').innerText = Math.round(res * pPerV).toLocaleString();
+        document.getElementById('pFinal').innerText = 'NT$ ' + Math.round(pOrig - pPoolVal + (res * pPerV)).toLocaleString();
+
+        document.getElementById('rTitleTotal').innerText = '原始營收 NT$ ' + rRev.toLocaleString();
+        document.getElementById('rPool').innerText = Math.round(rPoolVal).toLocaleString();
+        document.getElementById('rPer').innerText = Math.round(rPerV).toLocaleString();
+        document.getElementById('rPaid').innerText = Math.round(rP).toLocaleString();
+        document.getElementById('rBack').innerText = Math.round(res * rPerV).toLocaleString();
+        document.getElementById('rFinal').innerText = 'NT$ ' + Math.round(pOrig - rPoolVal + (res * rPerV)).toLocaleString();
     }
+    calc();
 </script>
 </body>
 </html>
